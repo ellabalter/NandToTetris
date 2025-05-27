@@ -1,0 +1,17 @@
+class Main
+{
+   function void main()
+   {
+      var char key;
+      var String solution;
+      var Codle game;
+
+      let game = Codle.new();
+      
+      do game.run();
+      do game.dispose();
+   
+      
+      return;
+   }
+}

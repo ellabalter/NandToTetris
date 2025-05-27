@@ -1,0 +1,299 @@
+class Codle {
+    field String solution;
+    field String correctGuesses;
+    field WordBank wordBank;
+    field char key;
+    field int seed1;
+    field int seed2;
+
+    constructor Codle new() {
+        // Initialize seeds
+        let seed1 = 0;
+        let seed2 = 1;  // Using 1 as default second seed
+        
+        // Show start screen and collect seed
+        do showStartScreen();
+        do waitForStart();
+        
+        // Clear screen and show game instructions
+        do Screen.clearScreen();
+        do Output.moveCursor(0,1);
+        do Output.printString("Welcome to Codle!");
+        do Output.moveCursor(1,1);
+        do Output.printString("G = right letter, right location");
+        do Output.moveCursor(2,1);
+        do Output.printString("Y = right letter, wrong location");
+        do Output.moveCursor(3,1);
+        do Output.printString("WRONG GUESSES:");
+        do Output.moveCursor(4,1);
+        
+        // Initialize WordBank with seed
+        let wordBank = WordBank.new();
+        do initializeWithSeed();
+        
+        return this;
+    }
+
+    method void showStartScreen() {
+        do Screen.clearScreen();
+        
+        // Draw title at the top
+        do Output.moveCursor(10, 27);
+        do Output.printString(":) CODLE (:");
+        
+        // Draw hearts
+        do Screen.setColor(true);
+      
+        
+        // Draw instructions
+        do Output.moveCursor(12, 22);
+        do Output.printString("Press SPACE to start!");
+        
+        return;
+    }
+
+    method void waitForStart() {
+        var char key;
+        
+        while (true) {
+            let key = Keyboard.keyPressed();
+            let seed1 = seed1 + 1;  // Increment first seed
+            let seed2 = seed2 + 2;  // Increment second seed differently
+            
+            if (key = 32) { // Space key pressed
+                // Wait until space is released
+                while (Keyboard.keyPressed() = 32) {
+                    let seed1 = seed1 + 3;  // Keep changing seeds
+                    let seed2 = seed2 + 5;
+                }
+                return;
+            }
+            
+            do Sys.wait(50);
+        }
+        return;
+    }
+
+    // New method to initialize random with collected seeds
+    method void initializeWithSeed() {
+        do wordBank.setSeedValues(seed1, seed2);
+        return;
+    }
+
+
+    // Start and run the game
+    method void run() {
+        var boolean endGame;
+        var int line, wrongGuesses, column, guessesCount;
+        var String guessWord;
+        var char guess;
+        var int i,t,x;
+        var boolean InWord;
+
+        // Initialize game variables
+        let guessesCount = 1; 
+        let wrongGuesses = 0;
+        let line = 5; 
+        let column = 40;
+        let endGame = false;
+        let x = 0;
+    
+       
+        
+        // Draw initial game table
+            
+                let line = 5; 
+                 let column = 40;
+                do drawTable();
+                let solution = wordBank.getRandomWord();
+                let endGame = false;
+                let guessesCount = 1;
+                let wrongGuesses = 0;
+                let guessWord = String.new(5);
+                while (~endGame & wrongGuesses < 5) {
+                    let guessWord = String.new(5);
+                    let i = 0;
+                    while (i < 5) {
+                        do Output.moveCursor(line, column);
+                        let column = column + 5;
+
+                    // Read the player's guess
+                        let guess = Keyboard.readChar();
+
+                            
+                    // Check if the guess is a valid character
+                         while (guess = 129 & ( i > 0)  ){
+                            do Codle.deleteLastChar(guessWord);
+                            let column = column - 10;
+                            let i = i - 1;
+                            do Output.moveCursor(line,column);
+                             do Output.printString(" ");
+                             do Output.moveCursor(line - 2, column);
+                            do Output.printString(" ");
+                            do Output.moveCursor(line,column);
+                            let guess = Keyboard.readChar();
+                            do Output.moveCursor(line,column + 5);
+                            let column = column + 5;
+
+
+                        }
+
+                        if (((guess > 64) & (guess < 91)) | ((guess > 96) & (guess < 123))) {                          
+                        // Convert lowercase to uppercase
+
+                            if ((guess > 96) & (guess < 123)) {
+                                let guess = guess - 32; // Convert to uppercase
+                            }
+
+                        // Compare the guess to the solution
+                            if (guess = solution.charAt(i)) {
+                                do Output.moveCursor(line - 2, column - 5);
+                                do Output.printString("G");
+                                
+                                 // Correct letter, correct position                           
+                            }
+                            else {
+                                let t = 0;
+                                while (t < 5) {
+                                    if (solution.charAt(t) = guess) {
+                                        do Output.moveCursor(line - 2, column - 5);
+                                        do Output.printString("Y");
+                                         // Correct letter, wrong position
+                                    }
+                                    let t = t + 1;
+                                }
+                            }                        
+                        // Append the guess to the guess word
+                            let guessWord = guessWord.appendChar(guess);
+                        }
+
+                     // Move to the next character in the guess
+                    let i = i + 1;
+                    }
+
+                    // Print the guessed word
+                    do Output.moveCursor(5 + x, 1);
+                    do Output.printString(guessWord);
+                    let x = x + 1;
+
+                    // Check if the guess is correct
+                    if (~(isCorrectGuess(guessWord))) {
+                        let wrongGuesses = wrongGuesses + 1; 
+                  } else {
+                // Clear screen and display win message
+                        do Screen.clearScreen();
+                        do Output.moveCursor(8, 27);
+                        do Output.printString("YOU WIN!");
+                        do Output.moveCursor(10, 8);
+                        do Output.printString("Thank you for playing Codle, xoxo Noa & Ella");
+                        while (x < 10) {
+                             do Sys.wait(100);
+                             let x = x + 1;
+                        }   
+                        let endGame = true;
+                        return;
+                    }
+                       let column = 40;
+                     let line = line + 4;
+                  let guessesCount = guessesCount + 1;
+            
+                 // Check if the game ended due to 5 wrong guesses
+                 if (wrongGuesses = 5) {
+                 // Game over, show the solution
+                    do Screen.clearScreen();
+                    do Output.moveCursor(10, 30);
+                    do Output.printString("LOSER");
+                    do Output.moveCursor(12, 23);
+                    do Output.printString("The word was: " );
+                    do Output.printString(solution);
+                    let x = 0;
+                    while (x < 10) {
+                        do Sys.wait(100);
+                        let x = x + 1;
+                    }
+                    let endGame = true;
+                    return;
+                }
+
+            }
+
+        return;
+    }
+
+    // Verify if the guess is correct
+    method boolean isCorrectGuess(String guessWord) { 
+        var int i;
+        let i = 0;
+        
+        while (i < 5) {
+            if (guessWord.charAt(i) = solution.charAt(i)) {
+                let i = i + 1;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Draw the table with 5 cells
+    method void drawTable() { 
+    var int i;
+        do Screen.setColor(true);
+        let i = 0;
+        while(i<100){
+        do Codle.drawHeart(7780+i);
+        let i = i+ 2;
+        }
+        // Draw the outer lines of the table
+        do Screen.drawLine(300, 40, 500, 40);  // Top line
+        do Screen.drawLine(500, 40, 500, 240); // Right line
+        do Screen.drawLine(500, 240, 300, 240); // Bottom line
+        do Screen.drawLine(300, 240, 300, 40); // Left line
+        
+        // Draw the internal lines (cells)
+        do Screen.drawLine(340, 40, 340, 240); // Line 1
+        do Screen.drawLine(380, 40, 380, 240); // Line 2
+        do Screen.drawLine(420, 40, 420, 240); // Line 3
+        do Screen.drawLine(460, 40, 460, 240); // Line 4
+        
+        // Draw the horizontal lines (creating cells)
+        do Screen.drawLine(300, 80, 500, 80); // Line 1
+        do Screen.drawLine(300, 120, 500, 120); // Line 2
+        do Screen.drawLine(300, 160, 500, 160); // Line 3
+        do Screen.drawLine(300, 200, 500, 200); // Line 4
+        
+        return;
+    }
+    function void drawHeart(int location) {
+	var int memAddress; 
+	let memAddress = 16384+location;
+	// column 0
+	do Memory.poke(memAddress, 1820);
+	do Memory.poke(memAddress +32, 2210);
+	do Memory.poke(memAddress +64, 4161);
+	do Memory.poke(memAddress +96, 4097);
+	do Memory.poke(memAddress +128, 2050);
+	do Memory.poke(memAddress +160, 1028);
+	do Memory.poke(memAddress +192, 520);
+	do Memory.poke(memAddress +224, 272);
+	do Memory.poke(memAddress +256, 160);
+	do Memory.poke(memAddress +288, 64);
+	return;
+}
+function String deleteLastChar(String input) {
+    var int length;
+
+    let length = input.length(); // Get the current length of the string.
+    if (length > 0) {
+        do input.setCharAt(length - 1, 0); // Optionally overwrite the last char with null.
+        do input.eraseLastChar(); // Remove the last character.
+    }
+    return input; // Return the modified string.
+}
+
+    // Deallocate Object in Memory.
+   method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+}

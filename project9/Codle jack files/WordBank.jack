@@ -1,0 +1,72 @@
+class WordBank {
+    field Array words;
+    field LFSR32Rand random;
+    
+    constructor WordBank new() {
+        var String word1, word2, word3, word4, word5;
+        var String word6, word7, word8, word9, word10;
+        var String word11, word12, word13, word14, word15;
+        var String word16;
+        
+        let random = LFSR32Rand.new();
+        
+        // Initialize all your existing words
+        let word1 = "STACK";
+        let word2 = "LOGIC";
+        let word3 = "GATES";
+        let word4 = "INPUT";
+        let word5 = "SHIFT";
+        let word6 = "CHIPS";
+        let word7 = "CLOCK";
+        let word8 = "ARRAY";
+        let word9 = "DEBUG";
+        let word10 = "FRAME";
+        let word11 = "POINT";
+        let word12 = "DEMUX";
+        let word13 = "SPEED";
+        let word14 = "SEEDS";
+        let word15 = "CODER";
+        let word16 = "CODLE";
+       
+
+        let words = Array.new(20);
+        let words[0] = word1;
+        let words[1] = word2;
+        let words[2] = word3;
+        let words[3] = word4;
+        let words[4] = word5;
+        let words[5] = word6;
+        let words[6] = word7;
+        let words[7] = word8;
+        let words[8] = word9;
+        let words[9] = word10;
+        let words[10] = word11;
+        let words[11] = word12;
+        let words[12] = word13;
+        let words[13] = word14;
+        let words[14] = word15;
+        let words[15] = word16;
+
+        return this;
+    }
+
+    // Make random field accessible to Codle class
+    method LFSR32Rand getRandom() {
+        return random;
+    }
+
+    method String getRandomWord() {
+        var int wordIndex;
+        let wordIndex = random.randRange(0, 16);
+        return words[wordIndex];
+    }
+    method void setSeedValues(int seed1, int seed2) {
+        do random.seed(seed1, seed2);
+        return;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+}
